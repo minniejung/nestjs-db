@@ -45,8 +45,7 @@ export class UserRepository {
     updateUserDto: Partial<CreateUserDto>
   ): Promise<User> {
     // Todo: update은 userId로 유저의 정보를 수정해야 합니다.
-    // await this.userRepository.update(userId , { ...updateUserDto });
-    const existingUser = await this.userRepository.findOne({
+    const existingUser = await this.findOne({
       where: { userId },
     });
 
@@ -56,6 +55,14 @@ export class UserRepository {
 
     const merged = this.userRepository.merge(existingUser, updateUserDto);
     return await this.userRepository.save(merged);
+
+    // if (!existingUser) throw new Error(`User with ID ${userId} not found`);
+    // await this.userRepository.update(existingUser.id, {
+    //   email: updateUserDto.email,
+    // });
+    // const updatedUser = await this.findOne({ userId });
+    // if (!updatedUser) throw new Error(`User with ID ${userId} not found`);
+    // return updatedUser;
   }
 
   async delete(userId: string): Promise<void> {
