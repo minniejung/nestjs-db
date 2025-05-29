@@ -17,7 +17,7 @@ export class UserRepository {
     return user ?? undefined;
   }
 
-  async findAll(): Promise<User[]> {
+  findAll(): Promise<User[]> {
     // Todo: findAll은 전체 데이터를 조회해야 합니다.
     return this.userRepository.find();
   }
@@ -28,13 +28,14 @@ export class UserRepository {
     return await this.userRepository.save(user);
   }
 
-  async countAll(): Promise<number> {
+  countAll(): Promise<number> {
     // Todo: countAll은 전체 데이터의 개수를 조회해야 합니다.
     return this.userRepository.count();
   }
 
   async existsByUserId(userId: string): Promise<boolean> {
     // Todo: existsByUserId은 userId로 유저의 정보가 있는지 확인해야 합니다. 리턴은 boolean으로 해주세요.
+    // return this.userRepository.exists({ where: { userId } });
     const count = await this.userRepository.count({ where: { userId } });
     return count > 0;
   }
@@ -44,7 +45,10 @@ export class UserRepository {
     updateUserDto: Partial<CreateUserDto>
   ): Promise<User> {
     // Todo: update은 userId로 유저의 정보를 수정해야 합니다.
-    const existingUser = await this.findOne({ userId });
+    // await this.userRepository.update(userId , { ...updateUserDto });
+    const existingUser = await this.userRepository.findOne({
+      where: { userId },
+    });
 
     if (!existingUser) {
       throw new NotFoundException(`User with ID ${userId} not found`);

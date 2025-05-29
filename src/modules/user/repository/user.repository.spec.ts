@@ -1,18 +1,19 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { getRepositoryToken } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { UserRepository } from './user.repository';
-import { User } from '../../../common/db/entities/user.entity';
-import { CreateUserDto } from '../dto/create-user.dto';
+import { Test, TestingModule } from "@nestjs/testing";
+import { getRepositoryToken } from "@nestjs/typeorm";
+import { Repository } from "typeorm";
+import { UserRepository } from "./user.repository";
+import { User } from "../../../common/db/entities/user.entity";
+import { CreateUserDto } from "../dto/create-user.dto";
+import { exists } from "fs";
 
-describe('UserRepository', () => {
+describe("UserRepository", () => {
   let userRepository: UserRepository;
   let mockRepo: jest.Mocked<Repository<User>>;
 
   const createUserDto: CreateUserDto = {
-    userId: 'testuser',
-    email: 'test@example.com',
-    password: '1234',
+    userId: "testuser",
+    email: "test@example.com",
+    password: "1234",
   };
 
   beforeEach(async () => {
@@ -29,6 +30,8 @@ describe('UserRepository', () => {
             count: jest.fn(),
             merge: jest.fn(),
             delete: jest.fn(),
+            update: jest.fn(),
+            exists: jest.fn(),
           },
         },
       ],
@@ -38,7 +41,7 @@ describe('UserRepository', () => {
     mockRepo = module.get(getRepositoryToken(User));
   });
 
-  it('새 사용자를 생성해야 합니다.', async () => {
+  it("새 사용자를 생성해야 합니다.", async () => {
     const newUser = { ...createUserDto, id: 1 } as User;
     mockRepo.create.mockReturnValue(newUser);
     mockRepo.save.mockResolvedValue(newUser);
@@ -49,48 +52,48 @@ describe('UserRepository', () => {
     expect(mockRepo.save).toHaveBeenCalledWith(newUser);
   });
 
-  it('모든 사용자를 조회해야 합니다.', async () => {
+  it("모든 사용자를 조회해야 합니다.", async () => {
     const users = [{ id: 1 }, { id: 2 }] as User[];
     mockRepo.find.mockResolvedValue(users);
     const result = await userRepository.findAll();
     expect(result).toEqual(users);
   });
 
-  it('특정 사용자를 조회해야 합니다.', async () => {
-    const user = { id: 1, userId: 'testuser' } as User;
+  it("특정 사용자를 조회해야 합니다.", async () => {
+    const user = { id: 1, userId: "testuser" } as User;
     mockRepo.findOne.mockResolvedValue(user);
-    const result = await userRepository.findOne({ userId: 'testuser' });
+    const result = await userRepository.findOne({ userId: "testuser" });
     expect(result).toEqual(user);
   });
 
-  it('전체 사용자 수를 계산해야 합니다.', async () => {
+  it("전체 사용자 수를 계산해야 합니다.", async () => {
     mockRepo.count.mockResolvedValue(5);
     const result = await userRepository.countAll();
     expect(result).toBe(5);
   });
 
-  it('userId로 사용자가 존재하는지 확인해야 합니다.', async () => {
+  it("userId로 사용자가 존재하는지 확인해야 합니다.", async () => {
     mockRepo.count.mockResolvedValue(1);
-    const exists = await userRepository.existsByUserId('testuser');
+    const exists = await userRepository.existsByUserId("testuser");
     expect(exists).toBe(true);
   });
 
-  it('사용자를 수정해야 합니다.', async () => {
-    const existingUser = { id: 1, userId: 'testuser' } as User;
-    const updatedUser = { ...existingUser, email: 'updated@example.com' };
+  it("사용자를 수정해야 합니다.", async () => {
+    const existingUser = { id: 1, userId: "testuser" } as User;
+    const updatedUser = { ...existingUser, email: "updated@example.com" };
     mockRepo.findOne.mockResolvedValue(existingUser);
     mockRepo.merge.mockReturnValue(updatedUser);
     mockRepo.save.mockResolvedValue(updatedUser);
 
-    const result = await userRepository.update('testuser', {
-      email: 'updated@example.com',
+    const result = await userRepository.update("testuser", {
+      email: "updated@example.com",
     });
 
     expect(result).toEqual(updatedUser);
   });
 
-  it('사용자를 삭제해야 합니다.', async () => {
-    await userRepository.delete('testuser');
-    expect(mockRepo.delete).toHaveBeenCalledWith({ userId: 'testuser' });
+  it("사용자를 삭제해야 합니다.", async () => {
+    await userRepository.delete("testuser");
+    expect(mockRepo.delete).toHaveBeenCalledWith({ userId: "testuser" });
   });
 });
